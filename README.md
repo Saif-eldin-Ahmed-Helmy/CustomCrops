@@ -1,0 +1,305 @@
+# CustomCrops Plugin
+
+A Minecraft plugin that changes how crops grow and adds a custom farming-based economy using a currency called **Cubes**.
+
+By default, Minecraft randomly updates 3 blocks per chunk every tick, which makes crop growth inconsistent and unpredictable. This plugin replaces that system with a more predictable and configurable one, without touching `randomTickSpeed` - so it won't cause any extra lag.
+
+It also includes a rotating shop where players can spend their Cubes, and a market where they can sell harvested crops for Cubes currency.
+
+---
+
+## ✅ Features
+
+- **Custom crop growth system independent of `randomTickSpeed`**  
+- **Configurable growth timers per crop type**  
+- **Introduces a new currency called Cubes**  
+- **Rotating shop with configurable prices, rarities, and actions**  
+- **Market for selling the custsom crops**  
+- **SQLite player balance and crop storage**  
+- **PlaceholderAPI integration for Cube balances**  
+- **Async database operations to prevent lag**  
+- **Built for performance and scalability**
+
+---
+
+## 🖼️ Screenshots
+
+> **Images**
+![Image](assets/image1.png)  
+![Image](assets/image2.png)  
+![Image](assets/image3.png)  
+![Image](assets/image4.png)  
+![Image](assets/image5.png)  
+---
+
+## 🛠️ Configuration File
+
+<details>
+  <summary><strong>📁 config.yml</strong></summary>
+
+```yaml
+# Crop growth times in seconds (e.g., 600 = 10 minutes)
+CropGrowthTimes:
+  WHEAT: 600
+  CARROTS: 600
+  POTATOES: 600
+  BEETROOTS: 600
+  NETHER_WART: 600
+  COCOA: 600
+  MELON_STEM: 600
+  PUMPKIN_STEM: 600
+  CACTUS: 600
+  SUGAR_CANE: 600
+
+CropSellPrices:
+  WHEAT: 10
+  CARROT: 10
+  POTATO: 10
+  BEETROOT: 10
+  NETHER_WART: 10
+  COCOA: 10
+  MELON: 10
+  PUMPKIN: 10
+  CACTUS: 10
+  SUGAR_CANE: 10
+
+CustomCropItem:
+  Name: "&aCrop: %crop_name%"
+  Lore:
+    - "&7Harvested from a custom crop."
+    - "&7Price: %price% Cubes."
+    - ""
+    - "&eYou can sell it to the black-market NPC at spawn!"
+
+CropInfoGUI:
+  Size: 45
+  Title: "&6&lGrowth Status"
+  Fill-Background:
+    Material: LIME_STAINED_GLASS_PANE
+    Name: " "
+  Barrier:
+    Material: GREEN_STAINED_GLASS_PANE
+    Name: " "
+  Items:
+    StatusHeader:
+      Slot: 20
+      Material: CLOCK
+      Name: "&e&lGrowth Status"
+      Lore:
+        - "&7Crop Type: &f%crop_type%"
+        - "&7Time Remaining: &f%time_remaining%"
+        - "&7Growth Percentage: &f%growth_percentage%"
+    CropIcon:
+      Slot: 24
+      Material: "%crop_icon%"
+      Name: "&a%crop_type%"
+      Lore:
+        - "&7Planted: &f%planted_time%"
+    CloseButton:
+      Slot: 40
+      Material: BARRIER
+      Name: "&cClose"
+      Action: close
+
+
+
+# Messages for cubes currency
+Messages:
+  Prefix: "&8[<GRADIENT:00FFFF>Crops</GRADIENT:ADD8E6>&8]"
+  Balance: "%prefix% <GRADIENT:00FFFF>You have</GRADIENT:ADD8E6> <GRADIENT:00FFFF>%cubes%</GRADIENT:ADD8E6> <GRADIENT:00FFFF>cubes.</GRADIENT:ADD8E6>"
+  BalanceOther: "%prefix% <GRADIENT:00FFFF>%player% has</GRADIENT:ADD8E6> <GRADIENT:00FFFF>%cubes%</GRADIENT:ADD8E6> <GRADIENT:00FFFF>cubes.</GRADIENT:ADD8E6>"
+  Give: "%prefix% <GRADIENT:00FFFF>You gave</GRADIENT:ADD8E6> <GRADIENT:00FFFF>%amount%</GRADIENT:ADD8E6> <GRADIENT:00FFFF>cubes to</GRADIENT:ADD8E6> <GRADIENT:00FFFF>%player%</GRADIENT:ADD8E6>."
+  Receive: "%prefix% <GRADIENT:00FFFF>You received</GRADIENT:ADD8E6> <GRADIENT:00FFFF>%amount%</GRADIENT:ADD8E6> <GRADIENT:00FFFF>cubes from</GRADIENT:ADD8E6> <GRADIENT:00FFFF>%player%</GRADIENT:ADD8E6>."
+  Set: "%prefix% <GRADIENT:00FFFF>You set</GRADIENT:ADD8E6> <GRADIENT:00FFFF>%player%</GRADIENT:ADD8E6>'s <GRADIENT:00FFFF>balance to</GRADIENT:ADD8E6> <GRADIENT:00FFFF>%amount%</GRADIENT:ADD8E6> <GRADIENT:00FFFF>cubes.</GRADIENT:ADD8E6>"
+  Pay: "%prefix% <GRADIENT:00FFFF>You paid</GRADIENT:ADD8E6> <GRADIENT:00FFFF>%amount%</GRADIENT:ADD8E6> <GRADIENT:00FFFF>cubes to</GRADIENT:ADD8E6> <GRADIENT:00FFFF>%player%</GRADIENT:ADD8E6>."
+  InsufficientFunds: "%prefix% <GRADIENT:00FFFF>You don't have enough cubes to complete this transaction.</GRADIENT:ADD8E6>"
+  SoldCrops: "<GRADIENT:00FFFF>You sold</GRADIENT:ADD8E6> <GRADIENT:00FFFF>%amount%</GRADIENT:ADD8E6> <GRADIENT:00FFFF>crops for</GRADIENT:ADD8E6> <GRADIENT:00FFFF>%total%</GRADIENT:ADD8E6> <GRADIENT:00FFFF>cubes.</GRADIENT:ADD8E6>"
+  NoCropsToSell: "<GRADIENT:00FFFF>You don't have any crops to sell.</GRADIENT:ADD8E6>"
+  PlayerOnlyCommand: "%prefix% <GRADIENT:00FFFF>This command can only be used by players.</GRADIENT:ADD8E6>"
+  NoPermission: "%prefix% <GRADIENT:00FFFF>You do not have permission to use this command.</GRADIENT:ADD8E6>"
+  InvalidArguments: "%prefix% <GRADIENT:00FFFF>Invalid arguments provided.</GRADIENT:ADD8E6>"
+  InvalidNumber: "%prefix% <GRADIENT:00FFFF>Please provide a valid number.</GRADIENT:ADD8E6>"
+  PlayerNotFound: "%prefix% <GRADIENT:00FFFF>Player not found.</GRADIENT:ADD8E6>"
+  InvalidCommand: "%prefix% <GRADIENT:00FFFF>Invalid command."
+  Reload: "%prefix% &aPlugin configuration reloaded successfully."
+
+# Rotating shop configuration
+RotatingShop:
+  Size: 45
+  Title: "<GRADIENT:00FFFF>&lRotating Shop</GRADIENT:ADD8E6>"
+  ResetTimes:
+    - "00:00"
+    - "12:00"
+    # - "Sunday 00:00" if you want it to reset weekly on Sunday at 00:00
+    # - "1 00:00" if you want it to reset monthly on the 1st of every month at 00:00
+  Rarities:
+    Awesome:
+      Chance: 5
+      DisplayName: "&6Awesome"
+    Epic:
+      Chance: 10
+      DisplayName: "&5Epic"
+    Rare:
+      Chance: 25
+      DisplayName: "&9Rare"
+    Common:
+      Chance: 60
+      DisplayName: "&aCommon"
+  Slots: [20, 21, 22, 23, 24] # Slots where items will be displayed in the shop
+
+  Fill-Background:
+    Material: CYAN_STAINED_GLASS_PANE
+    Name: " "
+  Barrier:
+    Material: LIGHT_BLUE_STAINED_GLASS_PANE
+    Name: " "
+  Items: # Decoration items in the shop
+    'Rotating-Shop':
+      Slot: 4
+      Material: CLOCK
+      Name: "&8⋗ <GRADIENT:00FFFF>Rotating Shop</GRADIENT:ADD8E6> &8⋖"
+      Lore:
+        - "&8&l❙ &7Next Rotation in: <GRADIENT:00FFFF>%rotation_time%</GRADIENT:ADD8E6>"
+        - "&8&l❙ &7Balance: &f%balance% <GRADIENT:00FFFF>Cubes</GRADIENT:ADD8E6>"
+        - " "
+        - "&8&l❙ &eClick to close the shop."
+      Action: close
+
+  ShopItems:
+    'CoolDiamond':
+      Rarity: Awesome
+      Material: DIAMOND
+      Name: "&bA Cool Diamond"
+      Lore:
+        - "&7Very shiny and valuable!"
+        - ""
+        - "&8&l❙ &aRarity: %rarity%"
+        - "&8&l❙ &aPrice: &210 &aCubes"
+        - ""
+        - "&8&l❙ &eClick here to buy"
+      Glow: true
+      Price: 10
+      Actions:
+        - "{console} give %player% diamond 1"
+        - "{message} &aYou received a Cool Diamond!"
+        - "{broadcast} &b%player% just bought a Cool Diamond from the shop!"
+        - "{title} &aCool Diamond;&7Enjoy your shiny item!"
+        - "{action} &aEnjoy your item!"
+        - "{sound} ENTITY_PLAYER_LEVELUP"
+        - "{particle} END_ROD"
+        - "{close}"
+
+    'CoolEmerald':
+      Rarity: Awesome
+      Material: EMERALD
+      Name: "&aA Cool Emerald"
+      Lore:
+        - "&7Very shiny and valuable!"
+        - ""
+        - "&8&l❙ &aRarity: %rarity%"
+        - "&8&l❙ &aPrice: &210 &aCubes"
+        - ""
+        - "&8&l❙ &eClick here to buy"
+      Glow: true
+      Price: 10
+      Actions:
+        - "{console} give %player% emerald 1"
+        - "{message} &aYou received a Cool Emerald!"
+        - "{broadcast} &a%player% just bought a Cool Emerald from the shop!"
+        - "{title} &aCool Emerald;&7Enjoy your shiny item!"
+        - "{action} &aEnjoy your item!"
+        - "{sound} ENTITY_PLAYER_LEVELUP"
+        - "{particle} END_ROD"
+        - "{close}"
+
+    'CoolGold':
+      Rarity: Epic
+      Material: GOLD_INGOT
+      Name: "&6A Cool Gold Ingot"
+      Lore:
+        - "&7Very shiny and valuable!"
+        - ""
+        - "&8&l❙ &aRarity: %rarity%"
+        - "&8&l❙ &aPrice: &210 &aCubes"
+        - ""
+        - "&8&l❙ &eClick here to buy"
+      Glow: true
+      Price: 10
+      Actions:
+        - "{console} give %player% gold_ingot 1"
+        - "{message} &aYou received a Cool Gold Ingot!"
+        - "{broadcast} &6%player% just bought a Cool Gold Ingot from the shop!"
+        - "{title} &aCool Gold Ingot;&7Enjoy your shiny item!"
+        - "{action} &aEnjoy your item!"
+        - "{sound} ENTITY_PLAYER_LEVELUP"
+        - "{particle} END_ROD"
+        - "{close}"
+
+    'CoolIron':
+      Rarity: Rare
+      Material: IRON_INGOT
+      Name: "&fA Cool Iron Ingot"
+      Lore:
+        - "&7Very shiny and valuable!"
+        - ""
+        - "&8&l❙ &aRarity: %rarity%"
+        - "&8&l❙ &aPrice: &210 &aCubes"
+        - ""
+        - "&8&l❙ &eClick here to buy"
+      Glow: true
+      Price: 10
+      Actions:
+        - "{console} give %player% iron_ingot 1"
+        - "{message} &aYou received a Cool Iron Ingot!"
+        - "{broadcast} &f%player% just bought a Cool Iron Ingot from the shop!"
+        - "{title} &aCool Iron Ingot;&7Enjoy your shiny item!"
+        - "{action} &aEnjoy your item!"
+        - "{sound} ENTITY_PLAYER_LEVELUP"
+        - "{particle} END_ROD"
+        - "{close}"
+
+    'CoolLapis':
+      Rarity: Common
+      Material: LAPIS_LAZULI
+      Name: "&9A Cool Lapis"
+      Lore:
+        - "&7Very shiny and valuable!"
+        - ""
+        - "&8&l❙ &aRarity: %rarity%"
+        - "&8&l❙ &aPrice: &210 &aCubes"
+        - ""
+        - "&8&l❙ &eClick here to buy"
+      Glow: true
+      Price: 10
+      Actions:
+        - "{console} give %player% lapis_lazuli 1"
+        - "{message} &aYou received a Cool Lapis!"
+        - "{broadcast} &9%player% just bought a Cool Lapis from the shop!"
+        - "{title} &aCool Lapis;&7Enjoy your shiny item!"
+        - "{action} &aEnjoy your item!"
+        - "{sound} ENTITY_PLAYER_LEVELUP"
+        - "{particle} END_ROD"
+        - "{close}"
+
+    'CoolQuartz':
+      Rarity: Common
+      Material: QUARTZ
+      Name: "&fA Cool Quartz"
+      Lore:
+        - "&7Very shiny and valuable!"
+        - ""
+        - "&8&l❙ &aRarity: %rarity%"
+        - "&8&l❙ &aPrice: &210 &aCubes"
+        - ""
+        - "&8&l❙ &eClick here to buy"
+      Glow: true
+      Price: 10
+      Actions:
+        - "{console} give %player% quartz 1"
+        - "{message} &aYou received a Cool Quartz!"
+        - "{broadcast} &f%player% just bought a Cool Quartz from the shop!"
+        - "{title} &aCool Quartz;&7Enjoy your shiny item!"
+        - "{action} &aEnjoy your item!"
+        - "{sound} ENTITY_PLAYER_LEVELUP"
+        - "{particle} END_ROD"
+        - "{close}"
