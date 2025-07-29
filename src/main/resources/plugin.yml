@@ -1,0 +1,20 @@
+name: CustomCrops
+version: 1.0.0
+main: me.castiel.customcrops.CustomCropsPlugin
+api-version: 1.21
+author: Castiel
+description: Adds custom crop growth mechanics and economy.
+
+softdepend:
+  - PlaceholderAPI
+
+commands:
+  customcrops:
+    description: Main command for CustomCrops plugin
+    usage: /<command>
+    aliases: [cube, cubes, crop, crops, ccrops]
+
+permissions:
+  customcrops.admin:
+    description: Allows use of admin commands for CustomCrops
+    default: op
