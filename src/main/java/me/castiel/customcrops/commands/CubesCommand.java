@@ -209,13 +209,36 @@ public class CubesCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        // Rotate shop now
+        if (sub.equals("rotate")) {
+            if (!sender.hasPermission("customcrops.admin")) {
+                Actions.sendMessage(sender, plugin.getSettingsManager().getMessage("NoPermission"));
+                return true;
+            }
+            if (args.length != 1) {
+                Actions.sendMessage(sender, plugin.getSettingsManager().getMessage("InvalidArguments"));
+                return true;
+            }
+            plugin.getRotatingShopManager().rotateNow();
+            String msg = plugin.getSettingsManager().getMessage("ShopRotated");
+            if (msg == null || msg.isEmpty()) msg = "Shop rotated.";
+            Actions.sendMessage(sender, msg);
+            return true;
+        }
+
         if (sub.equals("reload")) {
             if (!sender.hasPermission("customcrops.admin")) {
                 Actions.sendMessage(sender, plugin.getSettingsManager().getMessage("NoPermission"));
                 return true;
             }
             plugin.getSettingsManager().reload();
+            // Reload shop config and rotate to apply new items/rarities/slots immediately
+            plugin.getRotatingShopManager().reloadFromConfig(true);
             Actions.sendMessage(sender, plugin.getSettingsManager().getMessage("Reload"));
+            String rotated = plugin.getSettingsManager().getMessage("ShopRotated");
+            if (rotated != null && !rotated.isEmpty()) {
+                Actions.sendMessage(sender, rotated);
+            }
             return true;
         }
 
@@ -234,6 +257,8 @@ public class CubesCommand implements CommandExecutor, TabCompleter {
                 completions.add("set");
                 completions.add("sell");
                 completions.add("market");
+                completions.add("rotate");
+                completions.add("reload");
             }
             completions.add("bal");
             completions.add("pay");

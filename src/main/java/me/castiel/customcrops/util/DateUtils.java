@@ -1,5 +1,8 @@
 package me.castiel.customcrops.util;
 
+import me.castiel.customcrops.CustomCropsPlugin;
+import org.bukkit.configuration.file.FileConfiguration;
+
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -64,13 +67,15 @@ public class DateUtils {
     }
 
     public static String format(long seconds) {
-        // Hardcoded format values
-        final String WEEKS_FORMAT = "&a%weeks%W";
-        final String DAYS_FORMAT = "&a%days%D";
-        final String HOURS_FORMAT = "&a%hours%H";
-        final String MINUTES_FORMAT = "&a%minutes%M";
-        final String SECONDS_FORMAT = "&a%seconds%S";
-        final String SEPARATOR = "&7 ";
+        FileConfiguration config = CustomCropsPlugin.getInstance().getConfig();
+        String weeksFormat = config.getString("TimeFormat.Weeks", "&a%weeks%w");
+        String daysFormat = config.getString("TimeFormat.Days", "&a%days%d");
+        String hoursFormat = config.getString("TimeFormat.Hours", "&a%hours%h");
+        String minutesFormat = config.getString("TimeFormat.Minutes", "&a%minutes%m");
+        String secondsFormat = config.getString("TimeFormat.Seconds", "&a%seconds%s");
+        String separator = config.getString("TimeFormat.Separator", "&7 ");
+        String lastSeparator = config.getString("TimeFormat.LastSeparator", "&7 and ");
+        boolean showZeroValues = config.getBoolean("TimeFormat.Show-Zero-Values", false);
 
         long weeks = seconds / 604800;
         seconds %= 604800;
@@ -82,29 +87,24 @@ public class DateUtils {
         seconds %= 60;
 
         StringBuilder builder = new StringBuilder();
-
-        if (weeks > 0) {
-            builder.append(WEEKS_FORMAT.replace("%weeks%", String.valueOf(weeks)));
+        if (weeks > 0 || showZeroValues) {
+            builder.append(weeksFormat.replace("%weeks%", String.valueOf(weeks)));
         }
-
-        if (days > 0) {
-            if (builder.length() > 0) builder.append(SEPARATOR);
-            builder.append(DAYS_FORMAT.replace("%days%", String.valueOf(days)));
+        if (days > 0 || showZeroValues) {
+            if (builder.length() > 0) builder.append(separator);
+            builder.append(daysFormat.replace("%days%", String.valueOf(days)));
         }
-
-        if (hours > 0) {
-            if (builder.length() > 0) builder.append(SEPARATOR);
-            builder.append(HOURS_FORMAT.replace("%hours%", String.valueOf(hours)));
+        if (hours > 0 || showZeroValues) {
+            if (builder.length() > 0) builder.append(separator);
+            builder.append(hoursFormat.replace("%hours%", String.valueOf(hours)));
         }
-
-        if (minutes > 0) {
-            if (builder.length() > 0) builder.append(SEPARATOR);
-            builder.append(MINUTES_FORMAT.replace("%minutes%", String.valueOf(minutes)));
+        if (minutes > 0 || showZeroValues) {
+            if (builder.length() > 0) builder.append(separator);
+            builder.append(minutesFormat.replace("%minutes%", String.valueOf(minutes)));
         }
-
-        if (seconds > 0 || builder.length() == 0) {
-            if (builder.length() > 0) builder.append(SEPARATOR);
-            builder.append(SECONDS_FORMAT.replace("%seconds%", String.valueOf(seconds)));
+        if (seconds > 0 || builder.length() == 0 || showZeroValues) {
+            if (builder.length() > 0) builder.append(lastSeparator);
+            builder.append(secondsFormat.replace("%seconds%", String.valueOf(seconds)));
         }
 
         return builder.toString();

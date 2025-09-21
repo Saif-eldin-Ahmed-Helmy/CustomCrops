@@ -1,26 +1,26 @@
-package me.castiel.customcrops.currency;
+package me.castiel.customcrops.shop;
 
 import me.castiel.customcrops.CustomCropsPlugin;
 import org.bukkit.Bukkit;
 
-public class AutoSaveTask {
+public class ShopAutoSaveTask {
 
     private final CustomCropsPlugin plugin;
-    private final CurrencyManager currencyManager;
+    private final RotatingShopManager rotatingShopManager;
 
-    public AutoSaveTask(CustomCropsPlugin plugin, CurrencyManager currencyManager) {
+    public ShopAutoSaveTask(CustomCropsPlugin plugin, RotatingShopManager rotatingShopManager) {
         this.plugin = plugin;
-        this.currencyManager = currencyManager;
+        this.rotatingShopManager = rotatingShopManager;
         Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::run, 0L, 60L * 20L);
     }
 
     public void run() {
-        currencyManager.saveBalances(true);
+        rotatingShopManager.saveRequirements(true);
     }
 
     public void stop() {
         Bukkit.getScheduler().cancelTasks(plugin);
-        currencyManager.saveBalances(false);
+        rotatingShopManager.saveRequirements(false);
         plugin.getLogger().info("Currency auto save task stopped.");
     }
 

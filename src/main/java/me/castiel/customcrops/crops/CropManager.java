@@ -122,8 +122,9 @@ public class CropManager {
         }
         if (!dirtyCrops.isEmpty()) {
             if (async) {
-                cropDAO.saveCrops(dirtyCrops).thenRun(() ->
-                        Bukkit.getLogger().info("Saved " + dirtyCrops.size() + " crops to the database."));
+                cropDAO.saveCrops(dirtyCrops);
+                        //.thenRun(() ->
+                        //Bukkit.getLogger().info("Saved " + dirtyCrops.size() + " crops to the database."));
             }
             else {
                 cropDAO.saveCropsSync(dirtyCrops);

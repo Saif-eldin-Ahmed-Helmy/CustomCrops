@@ -3,9 +3,9 @@ package me.castiel.customcrops.shop;
 public class RotatingRarity {
     private final String id;
     private final String displayName;
-    private final int chance;
+    private final double chance;
 
-    public RotatingRarity(String id, String displayName, int chance) {
+    public RotatingRarity(String id, String displayName, double chance) {
         this.id = id;
         this.displayName = displayName;
         this.chance = chance;
@@ -19,7 +19,7 @@ public class RotatingRarity {
         return displayName;
     }
 
-    public int getChance() {
+    public double getChance() {
         return chance;
     }
 }

@@ -34,7 +34,24 @@ public class CubesPlaceholder extends PlaceholderExpansion {
     @Override
     public @Nullable String onPlaceholderRequest(Player player, @NotNull String params) {
         if (player == null) return "N/A";
+
         long bal = currencyManager.getBalance(player.getUniqueId().toString());
+
+        if (params.equalsIgnoreCase("formatted")) {
+            return formatBalance(bal);
+        }
+
         return String.valueOf(bal);
+    }
+
+    private String formatBalance(long balance) {
+        if (balance >= 1_000_000) {
+            return String.format("%.2fM", balance / 1_000_000.0);
+        } else if (balance >= 1_000) {
+            double value = balance / 1_000.0;
+            return value % 1 == 0 ? String.format("%.0fk", value) : String.format("%.2fk", value);
+        } else {
+            return String.valueOf(balance);
+        }
     }
 }

@@ -46,8 +46,17 @@ public class SQLiteDatabase {
                         PRIMARY KEY (playerUUID)
                     );
                 """;
+                // Add this to the `initializeDatabase` method in `SQLiteDatabase.java`
+                String createPlayerHighestItemTableSQL = """
+                    CREATE TABLE IF NOT EXISTS player_highest_item (
+                        playerUUID TEXT NOT NULL,
+                        highestRequirement INTEGER NOT NULL,
+                        PRIMARY KEY (playerUUID)
+                    );
+                """;
                 connection.createStatement().execute(createCropsTableSQL);
                 connection.createStatement().execute(createBalancesTableSQL);
+                connection.createStatement().execute(createPlayerHighestItemTableSQL);
             } catch (SQLException e) {
                 throw new RuntimeException("Failed to initialize database", e);
             }

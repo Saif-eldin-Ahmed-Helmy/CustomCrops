@@ -1,3 +1,13 @@
+TimeFormat:
+  Weeks: "&a%weeks%w"
+  Days: "&a%days%d"
+  Hours: "&a%hours%h"
+  Minutes: "&a%minutes%m"
+  Seconds: "&a%seconds%s"
+  Separator: "&7 "
+  LastSeparator: "&7 and "
+  Show-Zero-Values: false
+
 # Crop growth times in seconds (e.g., 600 = 10 minutes)
 CropGrowthTimes:
   WHEAT: 600
@@ -62,7 +72,6 @@ CropInfoGUI:
       Action: close
 
 
-
 # Messages for cubes currency
 Messages:
   Prefix: "&8[<GRADIENT:00FFFF>Crops</GRADIENT:ADD8E6>&8]"
@@ -82,6 +91,11 @@ Messages:
   PlayerNotFound: "%prefix% <GRADIENT:00FFFF>Player not found.</GRADIENT:ADD8E6>"
   InvalidCommand: "%prefix% <GRADIENT:00FFFF>Invalid command."
   Reload: "%prefix% &aPlugin configuration reloaded successfully."
+  ShopRotated: "%prefix% &aRotating shop items have been rotated."
+  ItemOutOfStock: "%prefix% <GRADIENT:00FFFF>This item is currently out of stock.</GRADIENT:ADD8E6>"
+  InsufficientLevel: "%prefix% <GRADIENT:00FFFF>This item requires you to first purchase a level %required_level% crop</GRADIENT:ADD8E6>"
+  ItemOutOfStockPlaceholder: "&cOUT OF STOCK"
+
 
 # Rotating shop configuration
 RotatingShop:
@@ -126,140 +140,146 @@ RotatingShop:
       Action: close
 
   ShopItems:
-    'CoolDiamond':
-      Rarity: Awesome
-      Material: DIAMOND
-      Name: "&bA Cool Diamond"
+    'CropCarrot':
+      Rarity: Common
+      Material: CARROT
+      Name: "&aCarrot"
       Lore:
-        - "&7Very shiny and valuable!"
+        - "&7A fresh crop."
         - ""
         - "&8&l❙ &aRarity: %rarity%"
         - "&8&l❙ &aPrice: &210 &aCubes"
+        - "&8&l❙ &aLevel Required: &f1"
+        - "&8&l❙ &aPersonal Stock: &f%personal_stock%"
+        - "&8&l❙ &aGlobal Stock: &f%global_stock%"
         - ""
         - "&8&l❙ &eClick here to buy"
-      Glow: true
+      Glow: false
       Price: 10
+      PersonalStock: 1
+      GlobalStock: 50
+      RequiredLevel: 1
       Actions:
-        - "{console} give %player% diamond 1"
-        - "{message} &aYou received a Cool Diamond!"
-        - "{broadcast} &b%player% just bought a Cool Diamond from the shop!"
-        - "{title} &aCool Diamond;&7Enjoy your shiny item!"
-        - "{action} &aEnjoy your item!"
-        - "{sound} ENTITY_PLAYER_LEVELUP"
-        - "{particle} END_ROD"
+        - "{console} give %player% carrot 1"
+        - "{message} &aYou received a Carrot!"
         - "{close}"
 
-    'CoolEmerald':
-      Rarity: Awesome
-      Material: EMERALD
-      Name: "&aA Cool Emerald"
+    'CropPotato':
+      Rarity: Common
+      Material: POTATO
+      Name: "&ePotato"
       Lore:
-        - "&7Very shiny and valuable!"
+        - "&7A fresh crop."
         - ""
         - "&8&l❙ &aRarity: %rarity%"
         - "&8&l❙ &aPrice: &210 &aCubes"
+        - "&8&l❙ &aLevel Required: &f2"
+        - "&8&l❙ &aPersonal Stock: &f%personal_stock%"
+        - "&8&l❙ &aGlobal Stock: &f%global_stock%"
         - ""
         - "&8&l❙ &eClick here to buy"
-      Glow: true
+      Glow: false
       Price: 10
+      PersonalStock: 1
+      GlobalStock: 50
+      RequiredLevel: 2
       Actions:
-        - "{console} give %player% emerald 1"
-        - "{message} &aYou received a Cool Emerald!"
-        - "{broadcast} &a%player% just bought a Cool Emerald from the shop!"
-        - "{title} &aCool Emerald;&7Enjoy your shiny item!"
-        - "{action} &aEnjoy your item!"
-        - "{sound} ENTITY_PLAYER_LEVELUP"
-        - "{particle} END_ROD"
+        - "{console} give %player% potato 1"
+        - "{message} &aYou received a Potato!"
         - "{close}"
 
-    'CoolGold':
-      Rarity: Epic
-      Material: GOLD_INGOT
-      Name: "&6A Cool Gold Ingot"
+    'CropWheat':
+      Rarity: Common
+      Material: WHEAT
+      Name: "&6Wheat"
       Lore:
-        - "&7Very shiny and valuable!"
+        - "&7A fresh crop."
         - ""
         - "&8&l❙ &aRarity: %rarity%"
         - "&8&l❙ &aPrice: &210 &aCubes"
+        - "&8&l❙ &aLevel Required: &f3"
+        - "&8&l❙ &aPersonal Stock: &f%personal_stock%"
+        - "&8&l❙ &aGlobal Stock: &f%global_stock%"
         - ""
         - "&8&l❙ &eClick here to buy"
-      Glow: true
+      Glow: false
       Price: 10
+      PersonalStock: 1
+      GlobalStock: 50
+      RequiredLevel: 3
       Actions:
-        - "{console} give %player% gold_ingot 1"
-        - "{message} &aYou received a Cool Gold Ingot!"
-        - "{broadcast} &6%player% just bought a Cool Gold Ingot from the shop!"
-        - "{title} &aCool Gold Ingot;&7Enjoy your shiny item!"
-        - "{action} &aEnjoy your item!"
-        - "{sound} ENTITY_PLAYER_LEVELUP"
-        - "{particle} END_ROD"
+        - "{console} give %player% wheat 1"
+        - "{message} &aYou received Wheat!"
         - "{close}"
 
-    'CoolIron':
+    'CropNetherWart':
       Rarity: Rare
-      Material: IRON_INGOT
-      Name: "&fA Cool Iron Ingot"
+      Material: NETHER_WART
+      Name: "&cNether Wart"
       Lore:
-        - "&7Very shiny and valuable!"
+        - "&7A fresh crop."
         - ""
         - "&8&l❙ &aRarity: %rarity%"
         - "&8&l❙ &aPrice: &210 &aCubes"
+        - "&8&l❙ &aLevel Required: &f4"
+        - "&8&l❙ &aPersonal Stock: &f%personal_stock%"
+        - "&8&l❙ &aGlobal Stock: &f%global_stock%"
         - ""
         - "&8&l❙ &eClick here to buy"
-      Glow: true
+      Glow: false
       Price: 10
+      PersonalStock: 1
+      GlobalStock: 50
+      RequiredLevel: 4
       Actions:
-        - "{console} give %player% iron_ingot 1"
-        - "{message} &aYou received a Cool Iron Ingot!"
-        - "{broadcast} &f%player% just bought a Cool Iron Ingot from the shop!"
-        - "{title} &aCool Iron Ingot;&7Enjoy your shiny item!"
-        - "{action} &aEnjoy your item!"
-        - "{sound} ENTITY_PLAYER_LEVELUP"
-        - "{particle} END_ROD"
+        - "{console} give %player% nether_wart 1"
+        - "{message} &aYou received Nether Wart!"
         - "{close}"
 
-    'CoolLapis':
-      Rarity: Common
-      Material: LAPIS_LAZULI
-      Name: "&9A Cool Lapis"
+    'CropCactus':
+      Rarity: Rare
+      Material: CACTUS
+      Name: "&2Cactus"
       Lore:
-        - "&7Very shiny and valuable!"
+        - "&7A fresh crop."
         - ""
         - "&8&l❙ &aRarity: %rarity%"
         - "&8&l❙ &aPrice: &210 &aCubes"
+        - "&8&l❙ &aLevel Required: &f5"
+        - "&8&l❙ &aPersonal Stock: &f%personal_stock%"
+        - "&8&l❙ &aGlobal Stock: &f%global_stock%"
         - ""
         - "&8&l❙ &eClick here to buy"
-      Glow: true
+      Glow: false
       Price: 10
+      PersonalStock: 1
+      GlobalStock: 50
+      RequiredLevel: 5
       Actions:
-        - "{console} give %player% lapis_lazuli 1"
-        - "{message} &aYou received a Cool Lapis!"
-        - "{broadcast} &9%player% just bought a Cool Lapis from the shop!"
-        - "{title} &aCool Lapis;&7Enjoy your shiny item!"
-        - "{action} &aEnjoy your item!"
-        - "{sound} ENTITY_PLAYER_LEVELUP"
-        - "{particle} END_ROD"
+        - "{console} give %player% cactus 1"
+        - "{message} &aYou received a Cactus!"
         - "{close}"
 
-    'CoolQuartz':
-      Rarity: Common
-      Material: QUARTZ
-      Name: "&fA Cool Quartz"
+    'CropSugarCane':
+      Rarity: Epic
+      Material: SUGAR_CANE
+      Name: "&fSugar Cane"
       Lore:
-        - "&7Very shiny and valuable!"
+        - "&7A fresh crop."
         - ""
         - "&8&l❙ &aRarity: %rarity%"
         - "&8&l❙ &aPrice: &210 &aCubes"
+        - "&8&l❙ &aLevel Required: &f6"
+        - "&8&l❙ &aPersonal Stock: &f%personal_stock%"
+        - "&8&l❙ &aGlobal Stock: &f%global_stock%"
         - ""
         - "&8&l❙ &eClick here to buy"
-      Glow: true
+      Glow: false
       Price: 10
+      PersonalStock: 1
+      GlobalStock: 50
+      RequiredLevel: 6
       Actions:
-        - "{console} give %player% quartz 1"
-        - "{message} &aYou received a Cool Quartz!"
-        - "{broadcast} &f%player% just bought a Cool Quartz from the shop!"
-        - "{title} &aCool Quartz;&7Enjoy your shiny item!"
-        - "{action} &aEnjoy your item!"
-        - "{sound} ENTITY_PLAYER_LEVELUP"
-        - "{particle} END_ROD"
+        - "{console} give %player% sugar_cane 1"
+        - "{message} &aYou received Sugar Cane!"
         - "{close}"

@@ -31,19 +31,10 @@ public class CubeCurrency {
     }
 
     public void add(long amount) {
-        if (amount < 0) {
-            CustomCropsPlugin.getInstance().getLogger().severe("Attempted to add a negative amount to balance for player " + playerUUID + ": " + amount);
-            return;
-        }
         this.balance += amount;
     }
 
     public void remove(long amount) {
-        if (amount < 0) {
-            CustomCropsPlugin.getInstance().getLogger().severe("Attempted to remove a negative amount from balance for player " + playerUUID + ": " + amount);
-            return;
-        }
-        if (amount > this.balance) throw new IllegalArgumentException("Insufficient balance");
         this.balance -= amount;
     }
 

@@ -179,4 +179,59 @@ public class CropDAO {
             throw new RuntimeException("Failed to set balances", e);
         }
     }
+
+    public CompletableFuture<Void> saveHighestRequirements(Map<String, Integer> playerRequirements) {
+        return CompletableFuture.runAsync(() -> {
+            String sql = """
+            INSERT OR REPLACE INTO player_highest_item (playerUUID, highestRequirement)
+            VALUES (?, ?);
+        """;
+            try (Connection connection = database.getConnection();
+                 PreparedStatement statement = connection.prepareStatement(sql)) {
+                for (Map.Entry<String, Integer> entry : playerRequirements.entrySet()) {
+                    statement.setString(1, entry.getKey());
+                    statement.setInt(2, entry.getValue());
+                    statement.addBatch();
+                }
+                statement.executeBatch();
+            } catch (SQLException e) {
+                throw new RuntimeException("Failed to save highest requirements", e);
+            }
+        });
+    }
+
+    public void saveHighestRequirementsSync(Map<String, Integer> playerRequirements) {
+        String sql = """
+            INSERT OR REPLACE INTO player_highest_item (playerUUID, highestRequirement)
+            VALUES (?, ?);
+        """;
+        try (Connection connection = database.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            for (Map.Entry<String, Integer> entry : playerRequirements.entrySet()) {
+                statement.setString(1, entry.getKey());
+                statement.setInt(2, entry.getValue());
+                statement.addBatch();
+            }
+            statement.executeBatch();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to save highest requirements", e);
+        }
+    }
+
+    public CompletableFuture<Map<String, Integer>> loadAllHighestRequirements() {
+        return CompletableFuture.supplyAsync(() -> {
+            Map<String, Integer> playerRequirements = new HashMap<>();
+            String sql = "SELECT playerUUID, highestRequirement FROM player_highest_item;";
+            try (Connection connection = database.getConnection();
+                 PreparedStatement statement = connection.prepareStatement(sql);
+                 ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    playerRequirements.put(resultSet.getString("playerUUID"), resultSet.getInt("highestRequirement"));
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException("Failed to load highest requirements", e);
+            }
+            return playerRequirements;
+        });
+    }
 }

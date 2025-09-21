@@ -2,6 +2,7 @@ package me.castiel.customcrops.inventories;
 
 import me.castiel.customcrops.CustomCropsPlugin;
 import me.castiel.customcrops.crops.CropData;
+import me.castiel.customcrops.util.DateUtils;
 import me.castiel.customcrops.util.StringUtils;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -21,9 +22,7 @@ public class CropsGUI {
         placeholders.put("%time_remaining%", () -> {
             int seconds = cropData.getTimeRemaining();
             if (seconds <= 1 || cropData.getLastGrowth() == 0) return "Fully generated";
-            int mins = seconds / 60;
-            int secs = seconds % 60;
-            return mins + "m " + secs + "s";
+            return DateUtils.format(seconds);
         });
 
         placeholders.put("%growth_percentage%", () -> {
@@ -58,8 +57,6 @@ public class CropsGUI {
     // Formats elapsed milliseconds to "Xm Ys ago"
     private static String formatTimeAgo(long elapsedMillis) {
         long seconds = elapsedMillis / 1000;
-        long mins = seconds / 60;
-        long secs = seconds % 60;
-        return mins + "m " + secs + "s ago";
+        return DateUtils.format(seconds) + " ago";
     }
 }

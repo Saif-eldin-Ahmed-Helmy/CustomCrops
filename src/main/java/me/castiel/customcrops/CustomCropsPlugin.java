@@ -62,7 +62,7 @@ public class CustomCropsPlugin extends JavaPlugin {
                     } else {
                         getLogger().warning("PlaceholderAPI not found, skipping placeholder registration");
                     }
-                    rotatingShopManager = new RotatingShopManager(this);
+                    rotatingShopManager = new RotatingShopManager(this, cropDAO);
                     cropManager = new CropManager(this, cropDAO);
                     CubesCommand cubesCommand = new CubesCommand(this);
                     getCommand("customcrops").setExecutor(cubesCommand);
@@ -78,6 +78,7 @@ public class CustomCropsPlugin extends JavaPlugin {
     public void onDisable() {
         cropManager.stopTasks();
         currencyManager.stopAutoSave();
+        rotatingShopManager.stopAutoSave();
         database.close();
         getLogger().info("CustomCrops plugin has been disabled!");
     }

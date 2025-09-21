@@ -149,6 +149,7 @@ public class CropData {
         return basename.equalsIgnoreCase("MELON_STEM") ? Material.MELON.name()
                 : basename.equalsIgnoreCase("PUMPKIN_STEM") ? Material.PUMPKIN.name()
                         : basename.equalsIgnoreCase("BEETROOTS") ? Material.BEETROOT.name()
+                : basename.equalsIgnoreCase("CARROTS") ? Material.CARROT.name()
                 : basename.equalsIgnoreCase("POTATOES") ? Material.POTATO.name()
                 : basename.equalsIgnoreCase("COCOA") ? Material.COCOA_BEANS.name()
 
