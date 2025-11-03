@@ -283,3 +283,25 @@ RotatingShop:
         - "{console} give %player% sugar_cane 1"
         - "{message} &aYou received Sugar Cane!"
         - "{close}"
+
+# Selling shop
+SellingShop:
+  Size: 27
+  Title: "<GRADIENT:59FF00>&lSell Crops</GRADIENT:ADE6C7>"
+  SellingGUISlots:
+    - "10-16"
+  Fill-Background:
+    Material: GREEN_STAINED_GLASS_PANE
+    Name: " "
+  Barrier:
+    Material: LIME_STAINED_GLASS_PANE
+    Name: " "
+  Items:
+    SellAllButton:
+      Slot: 22
+      Material: GOLD_INGOT
+      Name: "&eSell All Crops"
+      Lore:
+        - "&7Total Value: &a%value% Cubes"
+        - "&fClick to sell everything in the GUI."
+      Action: sellall

@@ -10,17 +10,18 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -41,6 +42,10 @@ public class ConfigurableInventoryGUI implements Listener {
     private BukkitTask refreshTask;
     private BukkitTask updateTask;
     private Runnable onDestroy;
+
+    // Optional item placement configuration
+    private Set<Integer> placeableSlots = Collections.emptySet();
+    private Predicate<ItemStack> placePredicate = null;
 
     /**
      * @param plugin main plugin instance
@@ -82,6 +87,23 @@ public class ConfigurableInventoryGUI implements Listener {
         buttonActions.put(slot, action);
     }
 
+    public void addAction(String actionKey, Consumer<InventoryClickEvent> eventConsumer) {
+        ConfigurationSection items = config.getConfigurationSection("Items");
+        if (items == null) return;
+        for (String key : items.getKeys(false)) {
+            ConfigurationSection sec = items.getConfigurationSection(key);
+            if (sec == null) continue;
+            int slot = sec.getInt("Slot", -1);
+            if (slot < 0 || slot >= inventory.getSize()) continue;
+            if (sec.isString("Action")) {
+                String action = sec.getString("Action");
+                if (action != null && action.equalsIgnoreCase(actionKey)) {
+                    buttonActions.put(slot, eventConsumer);
+                }
+            }
+        }
+    }
+
     public void buildContents() {
         inventory.clear();
         buttonActions.clear();
@@ -93,14 +115,16 @@ public class ConfigurableInventoryGUI implements Listener {
         }
         if (barrierEdges) {
             ConfigurationSection b = config.getConfigurationSection("Barrier");
-            Material mat = Material.valueOf(translate(b.getString("Material", "BARRIER")));
-            String name = translate(b.getString("Name", " "));
-            ItemStack barrier = new ItemStack(mat);
-            ItemMeta bm = barrier.getItemMeta(); bm.setDisplayName(name); barrier.setItemMeta(bm);
-            int size = inventory.getSize();
-            for (int i = 0; i < size; i++) {
-                if (i < 9 || i >= size - 9 || i % 9 == 0 || i % 9 == 8) {
-                    inventory.setItem(i, barrier);
+            if (b != null) {
+                Material mat = Material.valueOf(translate(b.getString("Material", "BARRIER")));
+                String name = translate(b.getString("Name", " "));
+                ItemStack barrier = new ItemStack(mat);
+                ItemMeta bm = barrier.getItemMeta(); if (bm != null) { bm.setDisplayName(name); barrier.setItemMeta(bm); }
+                int size = inventory.getSize();
+                for (int i = 0; i < size; i++) {
+                    if (i < 9 || i >= size - 9 || i % 9 == 0 || i % 9 == 8) {
+                        inventory.setItem(i, barrier);
+                    }
                 }
             }
         }
@@ -108,17 +132,24 @@ public class ConfigurableInventoryGUI implements Listener {
         if (items == null) return;
         for (String key : items.getKeys(false)) {
             ConfigurationSection sec = items.getConfigurationSection(key);
+            if (sec == null) continue;
             int slot = sec.getInt("Slot", -1);
             if (slot < 0 || slot >= inventory.getSize()) continue;
             Material mat = Material.valueOf(translate(sec.getString("Material", "STONE")));
             String name = translate(sec.getString("Name", ""));
             ItemStack item = new ItemStack(mat);
             ItemMeta meta = item.getItemMeta();
-            meta.setDisplayName(name);
-            if (sec.isList("Lore")) {
-                meta.setLore(sec.getStringList("Lore").stream().map(this::translate).toList());
+            if (meta != null) {
+                meta.setDisplayName(name);
+                if (sec.isList("Lore")) {
+                    List<String> lore = new ArrayList<>();
+                    for (String line : sec.getStringList("Lore")) {
+                        lore.add(translate(line));
+                    }
+                    meta.setLore(lore);
+                }
+                item.setItemMeta(meta);
             }
-            item.setItemMeta(meta);
             inventory.setItem(slot, item);
             if (sec.isString("Action")) {
                 String action = sec.getString("Action");
@@ -146,11 +177,76 @@ public class ConfigurableInventoryGUI implements Listener {
     @EventHandler
     public void onClick(InventoryClickEvent event) {
         if (!event.getView().getTopInventory().equals(inventory)) return;
-        event.setCancelled(true);
-        Consumer<InventoryClickEvent> action = buttonActions.get(event.getSlot());
-        if (action != null) {
-            action.accept(event);
+
+        // Click was in the top GUI
+        if (event.getClickedInventory() != null && event.getClickedInventory().equals(inventory)) {
+            event.setCancelled(true);
+
+            int slot = event.getSlot();
+            Consumer<InventoryClickEvent> action = buttonActions.get(slot);
+            if (action != null) {
+                action.accept(event);
+                return;
+            }
+
+            // Handle placeable slots if configured
+            if (placePredicate != null && placeableSlots.contains(slot)) {
+                handlePlaceableSlotClick(event);
+            }
+            return;
         }
+
+        // Click was in the player's own inventory (bottom)
+        if (event.getClickedInventory() != null && event.getClickedInventory().equals(event.getWhoClicked().getInventory())) {
+            // Intercept shift-clicks to insert into GUI when allowed
+            if (event.isShiftClick() && placePredicate != null) {
+                ItemStack clicked = event.getCurrentItem();
+                if (clicked != null && clicked.getType() != Material.AIR && placePredicate.test(clicked)) {
+                    // Try to move to first empty placeable slot
+                    for (Integer ps : placeableSlots) {
+                        if (ps < 0 || ps >= inventory.getSize()) continue;
+                        ItemStack target = inventory.getItem(ps);
+                        if (target == null || target.getType() == Material.AIR) {
+                            inventory.setItem(ps, clicked.clone());
+                            event.setCurrentItem(null);
+                            event.setCancelled(true); // prevent default shift behavior
+                            break;
+                        }
+                    }
+                } else {
+                    // Prevent default shift-click from pushing into GUI when not allowed
+                    event.setCancelled(true);
+                }
+            }
+            // Normal clicks in player inventory are allowed (not cancelled)
+        }
+    }
+
+    private void handlePlaceableSlotClick(InventoryClickEvent event) {
+        ItemStack cursor = event.getCursor();
+        ItemStack current = event.getCurrentItem();
+        ClickType type = event.getClick();
+
+        // Simple behavior: allow swap/place/pick with predicate on cursor when placing
+        if (cursor != null && cursor.getType() != Material.AIR) {
+            if (!placePredicate.test(cursor)) {
+                return; // keep cancelled
+            }
+            // Place or swap
+            event.setCursor(current);
+            event.getInventory().setItem(event.getSlot(), cursor);
+        } else {
+            // Picking up current item
+            event.setCursor(current);
+            event.getInventory().setItem(event.getSlot(), null);
+        }
+    }
+
+    @EventHandler
+    public void onDrag(InventoryDragEvent event) {
+        if (!event.getView().getTopInventory().equals(inventory)) return;
+        // Disallow drag into our GUI to keep logic simple and controlled
+        event.setCancelled(true);
     }
 
     @EventHandler
@@ -192,6 +288,16 @@ public class ConfigurableInventoryGUI implements Listener {
 
 
     public void addUpdateTask(Runnable updateTask) {
-        this.updateTask = Bukkit.getScheduler().runTaskTimer(plugin, updateTask, 0L, updateIntervalTicks);
+        long period = updateIntervalTicks > 0 ? updateIntervalTicks : 20L; // default 1s if not set
+        this.updateTask = Bukkit.getScheduler().runTaskTimer(plugin, updateTask, 0L, period);
+    }
+
+    public Inventory getInventory() {
+        return inventory;
+    }
+
+    public void configurePlaceableSlots(Set<Integer> slots, Predicate<ItemStack> predicate) {
+        this.placeableSlots = slots != null ? new HashSet<>(slots) : Collections.emptySet();
+        this.placePredicate = predicate;
     }
 }

@@ -2,6 +2,7 @@ package me.castiel.customcrops.commands;
 
 import me.castiel.customcrops.CustomCropsPlugin;
 import me.castiel.customcrops.currency.CurrencyManager;
+import me.castiel.customcrops.inventories.SellingGUI;
 import me.castiel.customcrops.shop.Actions;
 import me.castiel.customcrops.shop.RotatingShopGUI;
 import org.bukkit.Bukkit;
@@ -158,11 +159,10 @@ public class CubesCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        // Sell command
+        // Sell command -> open selling GUI for the player
         if (sub.equals("sell")) {
             if (!sender.hasPermission("customcrops.admin")) {
                 Actions.sendMessage(sender, plugin.getSettingsManager().getMessage("NoPermission"));
-                return true;
             }
             if (args.length != 2) {
                 Actions.sendMessage(sender, plugin.getSettingsManager().getMessage("InvalidArguments"));
@@ -173,20 +173,7 @@ public class CubesCommand implements CommandExecutor, TabCompleter {
                 Actions.sendMessage(sender, plugin.getSettingsManager().getMessage("PlayerNotFound"));
                 return true;
             }
-            long totalCubes = 0;
-            long totalItems = 0;
-            for (ItemStack item : target.getInventory().getContents()) {
-                if (item != null && plugin.getSettingsManager().getSellPrice(item.getType()) > 0) {
-                    totalCubes += plugin.getSettingsManager().getSellPrice(item.getType()) * item.getAmount();
-                    totalItems += item.getAmount();
-                    item.setAmount(0);
-                }
-            }
-            currencyManager.addCurrency(target.getUniqueId().toString(), totalCubes);
-            Actions.sendMessage(sender, plugin.getSettingsManager().getMessage("SoldCrops")
-                    .replace("%player%", target.getName())
-                    .replace("%amount%", String.valueOf(totalItems))
-                    .replace("%total%", String.valueOf(totalCubes)));
+            SellingGUI.openShop(target);
             return true;
         }
 
@@ -255,16 +242,16 @@ public class CubesCommand implements CommandExecutor, TabCompleter {
             if (sender.hasPermission("customcrops.admin")) {
                 completions.add("give");
                 completions.add("set");
-                completions.add("sell");
                 completions.add("market");
                 completions.add("rotate");
                 completions.add("reload");
             }
             completions.add("bal");
             completions.add("pay");
+            completions.add("sell");
         } else if (args.length == 2) {
             String sub = args[0].toLowerCase();
-            if ((sub.equals("give") || sub.equals("set") || sub.equals("bal") || sub.equals("pay") || sub.equals("sell") || sub.equals("market") || sub.equals("shop") || sub.equals("rotatingshop")) && sender.hasPermission("customcrops.admin")) {
+            if ((sub.equals("give") || sub.equals("set") || sub.equals("bal") || sub.equals("pay") || sub.equals("market") || sub.equals("shop") || sub.equals("rotatingshop")) && sender.hasPermission("customcrops.admin")) {
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     completions.add(player.getName());
                 }
